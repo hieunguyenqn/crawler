@@ -1,0 +1,12 @@
+package crawler
+
+import (
+  "net/url"
+)
+
+///////////////////////////////
+// Asset
+///////////////////////////////
+type Asset struct {
+  *url.URL
+}

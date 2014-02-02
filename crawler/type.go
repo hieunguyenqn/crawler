@@ -1,7 +1,6 @@
 package crawler
 
 import (
-  "fmt"
   "net/url"
   "sync"
 )
@@ -63,65 +62,9 @@ func (a *Assets) New(url *url.URL) *Asset {
   defer a.lock.Unlock()
 
   asset := new(Asset)
-  asset.URL = &URL{url}
+  asset.URL = url
   a.safeMap.data[url.String()] = asset
   return asset
-}
-
-///////////////////////////////
-// Page
-///////////////////////////////
-type Page struct {
-  *URL
-  Links  []*Page
-  Assets []*Asset
-}
-
-func NewPage(u *url.URL) *Page {
-  return &Page{URL: &URL{u}}
-}
-
-///////////////////////////////
-// Asset
-///////////////////////////////
-type Asset struct {
-  *URL
-}
-
-///////////////////////////////
-// URL
-///////////////////////////////
-type URL struct {
-  URL *url.URL
-}
-
-func (u URL) ParseRelative(path string) (*url.URL, error) {
-  switch {
-  case path == "":
-    return u.URL, nil
-  case path[0] == '#':
-    return nil, fmt.Errorf("ID Path: %s", path)
-  case len(path) > 2 && path[0:2] == "//":
-    return url.Parse(u.Scheme() + ":" + path)
-  default:
-    return url.Parse(u.subpage(path))
-  }
-}
-
-func (u URL) subpage(path string) string {
-  return fmt.Sprintf("%s://%s%s", u.URL.Scheme, u.URL.Host, path)
-}
-
-func (u URL) Host() string {
-  return u.URL.Host
-}
-
-func (u URL) Scheme() string {
-  return u.URL.Scheme
-}
-
-func (u URL) String() string {
-  return u.URL.String()
 }
 
 /////////////////////////////
