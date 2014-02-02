@@ -17,7 +17,7 @@ func main() {
 func Scrape(u string) *Page {
   page := new(Page)
   parsedUrl, _ := url.Parse(u)
-  page.URL = &URL{parsedUrl}
+  page.URL = parsedUrl
   j := newJob(page)
   j.Start()
   time.Sleep(1 * time.Second)
@@ -54,15 +54,8 @@ func (w *webWorker) Crawl(p *Page) bool {
       return
     }
 
-    parsedUrl, _ := url.Parse(u)
-    if parsedUrl.Scheme == "" {
-      var err error
-      if parsedUrl, err = p.ParseRelative(u); err != nil {
-        return
-      }
-    }
-
-    if parsedUrl.Host != p.URL.Host() {
+    parsedUrl, _ := p.Parse(u)
+    if parsedUrl.Host != p.URL.Host {
       return
     }
     // Skip any subpages of different domains
@@ -87,10 +80,7 @@ func (w *webWorker) Crawl(p *Page) bool {
         return
       }
 
-      parsedUrl, _ := url.Parse(u)
-      if parsedUrl.Scheme == "" {
-        parsedUrl, _ = p.ParseRelative(u)
-      }
+      parsedUrl, _ := p.URL.Parse(u)
       asset := w.job.Assets.New(parsedUrl)
       p.Assets = append(p.Assets, asset)
     })
