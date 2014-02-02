@@ -1,7 +1,7 @@
 package crawler_test
 
 import (
-  "github.com/macb/crawler"
+  "github.com/macb/crawler/crawler"
   "net/http"
   "net/http/httptest"
   "testing"
