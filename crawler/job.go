@@ -1,5 +1,11 @@
 package crawler
 
+import (
+  "sync"
+)
+
+const MAX_WEB_WORKERS int = 10
+
 /////////////////////////////
 // job
 /////////////////////////////
@@ -7,7 +13,8 @@ package crawler
 type job struct {
   ScrapeQueue  pageStack
   WebWorkers   []*webWorker
-  Retries      map[*Page]int64
+  retryLock    sync.Mutex
+  Retries      map[*Page]int
   Pages        Pages
   Assets       Assets
   PagesScraped int64
@@ -17,6 +24,7 @@ func newJob(page *Page) *job {
   j := new(job)
   j.Pages.safeMap.data = make(map[string]interface{})
   j.Assets.safeMap.data = make(map[string]interface{})
+  j.Retries = make(map[*Page]int)
   for i := 0; i < MAX_WEB_WORKERS; i++ {
     w := new(webWorker)
     w.job = j
@@ -49,6 +57,17 @@ func (j *job) WorkersDone() bool {
     }
   }
   return true
+}
+
+func (j *job) Requeue(page *Page) {
+  j.retryLock.Lock()
+  defer j.retryLock.Unlock()
+  val := j.Retries[page]
+  if val > 2 {
+    return
+  }
+  j.Retries[page] = val + 1
+  j.ScrapeQueue.Push(page)
 }
 
 func (j *job) startWorkers() {

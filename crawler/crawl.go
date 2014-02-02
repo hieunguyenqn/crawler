@@ -1,17 +1,13 @@
 package crawler
 
 import (
-  "sync/atomic"
-  //"code.google.com/p/go.net/html"
   "fmt"
   "github.com/PuerkitoBio/goquery"
-  //"net/http"
   "net/url"
   "strings"
+  "sync/atomic"
   "time"
 )
-
-const MAX_WEB_WORKERS int = 10
 
 func main() {
   Scrape("http://www.macasaurus.com")
@@ -44,7 +40,8 @@ func (w *webWorker) Crawl(p *Page) bool {
   if e != nil {
     // TODO Inspect error, don't blindly push.
     fmt.Println("Error: ", e)
-    w.job.ScrapeQueue.Push(p)
+    // Only retries 3 times.
+    w.job.Requeue(p)
     return false
   }
 

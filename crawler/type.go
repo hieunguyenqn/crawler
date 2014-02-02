@@ -4,8 +4,6 @@ import (
   "fmt"
   "net/url"
   "sync"
-  "sync/atomic"
-  "time"
 )
 
 ///////////////////////////////
@@ -27,15 +25,14 @@ func (p Pages) Value(key *url.URL) *Page {
   return ret.(*Page)
 }
 
-func (p *Pages) NewPage(url *url.URL) (*Page, bool) {
-  if page := p.Value(url); page != nil {
+func (p *Pages) NewPage(u *url.URL) (*Page, bool) {
+  if page := p.Value(u); page != nil {
     return page, false
   }
   p.lock.Lock()
   defer p.lock.Unlock()
-  page := new(Page)
-  page.URL = &URL{url}
-  p.safeMap.data[url.String()] = page
+  page := NewPage(u)
+  p.safeMap.data[u.String()] = page
   return page, true
 }
 
@@ -78,6 +75,10 @@ type Page struct {
   *URL
   Links  []*Page
   Assets []*Asset
+}
+
+func NewPage(u *url.URL) *Page {
+  return &Page{URL: &URL{u}}
 }
 
 ///////////////////////////////
@@ -169,69 +170,4 @@ func (s *safeMap) Value(key string) interface{} {
   s.lock.RLock()
   defer s.lock.RUnlock()
   return s.data[key]
-}
-
-/////////////////////////////
-// pageStack
-/////////////////////////////
-
-type pageStack struct {
-  data []*Page
-  lock sync.Mutex
-}
-
-func (s *pageStack) Len() int {
-  s.lock.Lock()
-  defer s.lock.Unlock()
-  return len(s.data)
-}
-
-func (s *pageStack) Push(page *Page) {
-  s.lock.Lock()
-  defer s.lock.Unlock()
-  s.data = append(s.data, page)
-}
-
-func (s *pageStack) Pop() (page *Page) {
-  s.lock.Lock()
-  defer s.lock.Unlock()
-  switch len(s.data) {
-  case 0:
-    return nil
-  case 1:
-    page = s.data[0]
-    s.data = make([]*Page, 0)
-  default:
-    page, s.data = s.data[0], s.data[1:len(s.data)]
-  }
-  return page
-}
-
-/////////////////////////////
-// webWorker
-/////////////////////////////
-
-type webWorker struct {
-  busy safeBool
-  job  *job
-  stop chan int
-}
-
-func (w *webWorker) Scrape() {
-  for {
-    select {
-    case <-w.stop:
-      return
-    default:
-      if page := w.job.ScrapeQueue.Pop(); page != nil {
-        w.busy.True()
-        success := w.Crawl(page)
-        if success {
-          atomic.AddInt64(&w.job.PagesScraped, 1)
-        }
-        w.busy.False()
-      }
-    }
-    time.Sleep(5 * time.Millisecond)
-  }
 }
