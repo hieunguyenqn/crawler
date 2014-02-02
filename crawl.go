@@ -1,8 +1,11 @@
-package main
+package crawler
 
 import (
+  "sync/atomic"
+  //"code.google.com/p/go.net/html"
   "fmt"
   "github.com/PuerkitoBio/goquery"
+  //"net/http"
   "net/url"
   "strings"
   "time"
@@ -13,10 +16,9 @@ const MAX_WEB_WORKERS int = 10
 func main() {
   Scrape("http://www.macasaurus.com")
   Scrape("http://www.digitalocean.com")
-
 }
 
-func Scrape(u string) {
+func Scrape(u string) *Page {
   page := new(Page)
   parsedUrl, _ := url.Parse(u)
   page.URL = &URL{parsedUrl}
@@ -25,6 +27,7 @@ func Scrape(u string) {
   time.Sleep(1 * time.Second)
   func() {
     for {
+      fmt.Println("Pages Scraped: ", atomic.LoadInt64(&j.PagesScraped))
       if j.Done() {
         j.Stop()
         return
@@ -32,13 +35,8 @@ func Scrape(u string) {
       time.Sleep(10 * time.Millisecond)
     }
   }()
-  for _, p := range page.Links {
-    fmt.Printf("Scraped %d pages.\n", j.PagesScraped)
-    fmt.Printf("Page: %s\n", p.URL)
-    for _, a := range p.Assets {
-      fmt.Printf("    Asset: %s\n", a.URL)
-    }
-  }
+
+  return page
 }
 
 func (w *webWorker) Crawl(p *Page) bool {
@@ -55,7 +53,6 @@ func (w *webWorker) Crawl(p *Page) bool {
     if !ok {
       return
     }
-
     if strings.Contains(u, "mailto") {
       return
     }
@@ -68,17 +65,15 @@ func (w *webWorker) Crawl(p *Page) bool {
       }
     }
 
-    // Skip any subpages of different domains
     if parsedUrl.Host != p.URL.Host() {
       return
     }
-
+    // Skip any subpages of different domains
     subpage, newPage := w.job.Pages.NewPage(parsedUrl)
     // Go gettem' tiger
     if newPage {
       w.job.ScrapeQueue.Push(subpage)
     }
-
     p.Links = append(p.Links, subpage)
   })
 

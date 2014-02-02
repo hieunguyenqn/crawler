@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
   "fmt"
@@ -102,8 +102,6 @@ func (u URL) ParseRelative(path string) (*url.URL, error) {
     return nil, fmt.Errorf("ID Path: %s", path)
   case len(path) > 2 && path[0:2] == "//":
     return url.Parse(u.Scheme() + ":" + path)
-  case path == "/":
-    return nil, fmt.Errorf("Root Path: %s", path)
   default:
     return url.Parse(u.subpage(path))
   }
@@ -210,68 +208,6 @@ func (s *pageStack) Pop() (page *Page) {
 }
 
 /////////////////////////////
-// job
-/////////////////////////////
-
-type job struct {
-  ScrapeQueue  pageStack
-  WebWorkers   []*webWorker
-  Pages        Pages
-  Assets       Assets
-  PagesScraped int64
-}
-
-func newJob(page *Page) *job {
-  j := new(job)
-  j.Pages.safeMap.data = make(map[string]interface{})
-  j.Assets.safeMap.data = make(map[string]interface{})
-  for i := 0; i < MAX_WEB_WORKERS; i++ {
-    w := new(webWorker)
-    w.job = j
-    w.stop = make(chan int)
-    j.WebWorkers = append(j.WebWorkers, w)
-  }
-  j.ScrapeQueue.Push(page)
-  return j
-}
-
-func (j *job) Start() {
-  j.startWorkers()
-}
-
-func (j *job) Stop() {
-  j.stopWorkers()
-}
-
-func (j *job) Done() bool {
-  if j.ScrapeQueue.Len() == 0 && j.WorkersDone() {
-    return true
-  }
-  return false
-}
-
-func (j *job) WorkersDone() bool {
-  for _, w := range j.WebWorkers {
-    if w.busy.Value() {
-      return false
-    }
-  }
-  return true
-}
-
-func (j *job) startWorkers() {
-  for _, w := range j.WebWorkers {
-    go w.Scrape()
-  }
-}
-
-func (j *job) stopWorkers() {
-  for _, w := range j.WebWorkers {
-    w.stop <- 1
-  }
-}
-
-/////////////////////////////
 // webWorker
 /////////////////////////////
 
@@ -296,6 +232,6 @@ func (w *webWorker) Scrape() {
         w.busy.False()
       }
     }
-    time.Sleep(1 * time.Millisecond)
+    time.Sleep(5 * time.Millisecond)
   }
 }
