@@ -27,6 +27,7 @@ func Test_pageStack_Len(t *testing.T) {
   s := newTestpageStack()
   page := newTestPage()
   s.Push(page)
+  poppedPage := s.Pop()
   if page != poppedPage {
     t.Errorf("Popped (%v) != Pushed (%v)", poppedPage, page)
   }
