@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-  crawler.Scrape("http://www.macasaurus.com")
-  crawler.Scrape("http://www.digitalocean.com")
+  printFirstLevel(crawler.Scrape("http://www.macasaurus.com"))
+  printFirstLevel(crawler.Scrape("http://www.digitalocean.com"))
 }
 
 func printFirstLevel(page *crawler.Page) {
