@@ -10,9 +10,18 @@ import (
 /////////////////////////////
 
 type webWorker struct {
+  id   int
   busy safeBool
   job  *job
   stop chan int
+}
+
+func newWebWorker(id int, j *job) *webWorker {
+  w := new(webWorker)
+  w.id = id
+  w.job = j
+  w.stop = make(chan int)
+  return w
 }
 
 func (w *webWorker) Scrape() {

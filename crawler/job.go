@@ -27,9 +27,7 @@ func newJob(page *Page) *job {
   j.Assets = NewAssets()
   j.Retries = make(map[*Page]int)
   for i := 0; i < MAX_WEB_WORKERS; i++ {
-    w := new(webWorker)
-    w.job = j
-    w.stop = make(chan int)
+    w := newWebWorker(i, j)
     j.WebWorkers = append(j.WebWorkers, w)
   }
   j.ScrapeQueue.Push(page)
