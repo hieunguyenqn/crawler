@@ -23,6 +23,7 @@ func (w *webWorker) Crawl(p *Page) bool {
     return false
   }
 
+  newPages := make([]*Page, 10)
   doc.Find("a").Each(func(i int, s *goquery.Selection) {
     u, ok := s.Attr("href")
     if !ok {
@@ -37,14 +38,17 @@ func (w *webWorker) Crawl(p *Page) bool {
     if parsedUrl.Host != p.URL.Host {
       return
     }
-    // Skip any subpages of different domains
+
+    // TODO Skip any subpages of different domains
     subpage, newPage := w.job.Pages.NewPage(parsedUrl)
+
     // Go gettem' tiger
     if newPage {
-      w.job.Queue.Push(subpage)
+      newPages = append(newPages, subpage)
     }
     p.Links = append(p.Links, subpage)
   })
+  w.job.Queue.PushBulk(newPages)
 
   assetTags := map[string]string{
     "script": "src",

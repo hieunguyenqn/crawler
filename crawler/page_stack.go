@@ -25,6 +25,12 @@ func (s *pageStack) Push(page *Page) {
   s.data = append(s.data, page)
 }
 
+func (s *pageStack) PushBulk(pages []*Page) {
+  s.lock.Lock()
+  defer s.lock.Unlock()
+  s.data = append(s.data, pages...)
+}
+
 func (s *pageStack) Pop() (page *Page) {
   s.lock.Lock()
   defer s.lock.Unlock()
