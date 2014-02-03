@@ -8,7 +8,10 @@ import (
 
 func main() {
   scrape("http://www.macasaurus.com", false)
+  scrape("http://www.devbootcamp.com", false)
+  scrape("http://www.spirent.com", false)
   scrape("http://www.digitalocean.com", false)
+  scrape("http://www.apple.com", false)
 }
 
 func printFirstLevel(page *crawler.Page) {
@@ -23,11 +26,11 @@ func printFirstLevel(page *crawler.Page) {
 
 func scrape(url string, printResults bool) {
   start := time.Now()
-  page := crawler.Scrape(url)
+  page, job := crawler.Scrape(url)
   if printResults {
     printFirstLevel(page)
   }
   stop := time.Now()
   duration := stop.Sub(start)
-  fmt.Printf("Scrape took: %s\n", duration)
+  fmt.Printf("Starting from %s, scraped %d pages in %s\n", page.URL, job.PagesScraped, duration)
 }
