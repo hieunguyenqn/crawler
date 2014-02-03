@@ -3,11 +3,12 @@ package main
 import (
   "fmt"
   "github.com/macb/crawler/crawler"
+  "time"
 )
 
 func main() {
-  printFirstLevel(crawler.Scrape("http://www.macasaurus.com"))
-  printFirstLevel(crawler.Scrape("http://www.digitalocean.com"))
+  scrape("http://www.macasaurus.com", false)
+  scrape("http://www.digitalocean.com", false)
 }
 
 func printFirstLevel(page *crawler.Page) {
@@ -18,4 +19,15 @@ func printFirstLevel(page *crawler.Page) {
       fmt.Println("    ", a.URL)
     }
   }
+}
+
+func scrape(url string, printResults bool) {
+  start := time.Now()
+  page := crawler.Scrape(url)
+  if printResults {
+    printFirstLevel(page)
+  }
+  stop := time.Now()
+  duration := stop.Sub(start)
+  fmt.Printf("Scrape took: %s\n", duration)
 }
