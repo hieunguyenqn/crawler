@@ -1,4 +1,5 @@
 *.test
+go-crawler
 output
 .DS_Store
 *.pprof
