@@ -56,3 +56,34 @@ func NewPageFromString(u string) (*Page, error) {
 
   return NewPage(parsedUrl), nil
 }
+
+func (p *Page) FlattenGraph() map[string]interface{} {
+  var f func(p *Page)
+  output := make(map[string]interface{})
+  visited := make(map[*Page]bool)
+
+  f = func(p *Page) {
+    visited[p] = true
+    output[p.Path] = p.Flatten()
+    for _, l := range p.Links {
+      if !visited[l] {
+        f(l)
+      }
+    }
+  }
+  f(p)
+  return output
+}
+
+func (p Page) Flatten() map[string]interface{} {
+  output := make(map[string]interface{})
+  output["Links"] = []string{}
+  for _, p := range p.Links {
+    output["Links"] = append(output["Links"].([]string), p.Path)
+  }
+  output["Assets"] = []string{}
+  for _, a := range p.Assets {
+    output["Assets"] = append(output["Assets"].([]string), a.Path)
+  }
+  return output
+}
