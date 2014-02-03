@@ -13,7 +13,7 @@ type Pages struct {
 
 func NewPages() *Pages {
   pages := new(Pages)
-  pages.safeMap = NewsafeMap()
+  pages.safeMap = newSafeMap()
   return pages
 }
 

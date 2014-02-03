@@ -13,7 +13,7 @@ type safeMap struct {
   lock sync.RWMutex
 }
 
-func NewsafeMap() *safeMap {
+func newSafeMap() *safeMap {
   s := new(safeMap)
   s.data = make(map[string]interface{})
   return s

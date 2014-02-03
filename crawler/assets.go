@@ -13,7 +13,7 @@ type Assets struct {
 
 func NewAssets() *Assets {
   assets := new(Assets)
-  assets.safeMap = NewsafeMap()
+  assets.safeMap = newSafeMap()
   return assets
 }
 
