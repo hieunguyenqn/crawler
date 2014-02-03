@@ -3,7 +3,6 @@ package crawler
 import (
   "fmt"
   "github.com/PuerkitoBio/goquery"
-  "net/url"
   "strings"
 )
 
@@ -12,14 +11,15 @@ func main() {
   Scrape("http://www.digitalocean.com")
 }
 
-func Scrape(u string) *Page {
-  page := new(Page)
-  parsedUrl, _ := url.Parse(u)
-  page.URL = parsedUrl
+func Scrape(u string) (*Page, *Job) {
+  page, err := NewPageFromString(u)
+  if err != nil {
+    panic(err)
+  }
   j := NewJob(page)
   j.Start()
   fmt.Println("Scraped: ", j.PagesScraped)
-  return page
+  return page, j
 }
 
 func (w *webWorker) Crawl(p *Page) bool {
