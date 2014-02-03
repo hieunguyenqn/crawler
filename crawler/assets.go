@@ -8,11 +8,13 @@ import (
 // Assets
 ///////////////////////////////
 type Assets struct {
-  safeMap
+  *safeMap
 }
 
-func (a *Assets) Add(key string, asset *Asset) {
-  a.safeMap.Add(key, asset)
+func NewAssets() *Assets {
+  assets := new(Assets)
+  assets.safeMap = NewsafeMap()
+  return assets
 }
 
 func (a Assets) Value(key string) (asset *Asset) {
@@ -23,16 +25,12 @@ func (a Assets) Value(key string) (asset *Asset) {
   return nil
 }
 
-func (a *Assets) New(url *url.URL) *Asset {
-  if asset := a.Value(url.String()); asset != nil {
-    return asset
+func (a *Assets) New(u *url.URL) *Asset {
+  asset := NewAsset(u)
+  ret, newEntry := a.Add(asset.String(), asset)
+  if !newEntry {
+    asset = ret.(*Asset)
   }
-  a.lock.Lock()
-  defer a.lock.Unlock()
-
-  asset := new(Asset)
-  asset.URL = url
-  a.safeMap.data[url.String()] = asset
   return asset
 }
 
@@ -41,4 +39,8 @@ func (a *Assets) New(url *url.URL) *Asset {
 ///////////////////////////////
 type Asset struct {
   *url.URL
+}
+
+func NewAsset(u *url.URL) *Asset {
+  return &Asset{URL: u}
 }

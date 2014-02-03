@@ -8,11 +8,13 @@ import (
 // Pages
 ///////////////////////////////
 type Pages struct {
-  safeMap
+  *safeMap
 }
 
-func (p *Pages) Add(key string, page *Page) {
-  p.safeMap.Add(key, page)
+func NewPages() *Pages {
+  pages := new(Pages)
+  pages.safeMap = NewsafeMap()
+  return pages
 }
 
 func (p Pages) Value(key *url.URL) *Page {
@@ -24,14 +26,12 @@ func (p Pages) Value(key *url.URL) *Page {
 }
 
 func (p *Pages) NewPage(u *url.URL) (*Page, bool) {
-  if page := p.Value(u); page != nil {
-    return page, false
-  }
-  p.lock.Lock()
-  defer p.lock.Unlock()
   page := NewPage(u)
-  p.safeMap.data[u.String()] = page
-  return page, true
+  ret, newEntry := p.Add(page.String(), page)
+  if !newEntry {
+    page = ret.(*Page)
+  }
+  return page, newEntry
 }
 
 ///////////////////////////////
