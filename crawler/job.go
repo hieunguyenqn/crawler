@@ -2,9 +2,10 @@ package crawler
 
 import (
   "sync"
+  "time"
 )
 
-const MAX_WEB_WORKERS int = 10
+const MAX_WEB_WORKERS int = 20
 
 /////////////////////////////
 // job
@@ -15,15 +16,15 @@ type job struct {
   WebWorkers   []*webWorker
   retryLock    sync.Mutex
   Retries      map[*Page]int
-  Pages        Pages
-  Assets       Assets
+  Pages        *Pages
+  Assets       *Assets
   PagesScraped int64
 }
 
 func newJob(page *Page) *job {
   j := new(job)
-  j.Pages.safeMap.data = make(map[string]interface{})
-  j.Assets.safeMap.data = make(map[string]interface{})
+  j.Pages = NewPages()
+  j.Assets = NewAssets()
   j.Retries = make(map[*Page]int)
   for i := 0; i < MAX_WEB_WORKERS; i++ {
     w := new(webWorker)
@@ -37,6 +38,18 @@ func newJob(page *Page) *job {
 
 func (j *job) Start() {
   j.startWorkers()
+  ticker := time.NewTicker(50 * time.Millisecond)
+  func() {
+    for {
+      select {
+      case <-ticker.C:
+        if j.Done() {
+          j.Stop()
+          return
+        }
+      }
+    }
+  }()
 }
 
 func (j *job) Stop() {

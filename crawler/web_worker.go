@@ -16,11 +16,12 @@ type webWorker struct {
 }
 
 func (w *webWorker) Scrape() {
+  ticker := time.NewTicker(50 * time.Millisecond)
   for {
     select {
     case <-w.stop:
       return
-    default:
+    case <-ticker.C:
       if w.job.ScrapeQueue.Len() > 0 {
         w.busy.True()
         if page := w.job.ScrapeQueue.Pop(); page != nil {
@@ -32,6 +33,5 @@ func (w *webWorker) Scrape() {
         w.busy.False()
       }
     }
-    time.Sleep(5 * time.Millisecond)
   }
 }
