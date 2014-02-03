@@ -6,7 +6,7 @@ import (
   "encoding/json"
   "fmt"
   "github.com/macb/crawler/crawler"
-  "io/ioutil"
+  //"io/ioutil"
   "os"
   "runtime/pprof"
   "time"
@@ -55,10 +55,10 @@ func crawl(url string, saveResults bool) {
 
   if saveResults {
     save(page)
-    a := graph(page)
-    filename := "/tmp/" + page.Path + ".dot"
-    ioutil.WriteFile(filename, []byte(a.String()), 0755)
-    fmt.Printf("Your .dot file is at: %s\n", filename)
+    //a := graph(page)
+    //filename := "/tmp/" + page.Path + ".dot"
+    //ioutil.WriteFile(filename, []byte(a.String()), 0755)
+    //fmt.Printf("Your .dot file is at: %s\n", filename)
   }
 }
 
