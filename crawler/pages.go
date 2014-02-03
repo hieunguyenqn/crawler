@@ -46,3 +46,12 @@ type Page struct {
 func NewPage(u *url.URL) *Page {
   return &Page{URL: u}
 }
+
+func NewPageFromString(u string) (*Page, error) {
+  parsedUrl, e := url.Parse(u)
+  if e != nil {
+    return nil, e
+  }
+
+  return NewPage(parsedUrl), nil
+}
