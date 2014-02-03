@@ -8,16 +8,18 @@ import (
   "time"
 )
 
-func main() {
-  //crawl("http://www.macasaurus.com", false)
-  f, _ := os.Create("rwar")
-  pprof.StartCPUProfile(f)
-  defer pprof.StopCPUProfile()
-  crawl("http://www.devbootcamp.com", false)
+var PPROF = os.Getenv("PPROF")
 
-  //crawl("http://www.spirent.com", false)
-  //crawl("http://www.digitalocean.com", false)
-  //crawl("http://www.apple.com", false)
+func main() {
+  if PPROF != "" {
+    f, _ := os.Create(PPROF)
+    pprof.StartCPUProfile(f)
+    defer pprof.StopCPUProfile()
+
+  }
+  crawl("http://www.macasaurus.com", false)
+  crawl("http://www.devbootcamp.com", false)
+  crawl("http://www.digitalocean.com", false)
 }
 
 func printFirstLevel(page *crawler.Page) {
