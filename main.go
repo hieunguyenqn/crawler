@@ -23,7 +23,7 @@ func main() {
   }
   crawl("http://www.macasaurus.com", true)
   crawl("http://www.devbootcamp.com", true)
-  //crawl("http://www.digitalocean.com", true)
+  crawl("http://www.digitalocean.com", true)
 }
 
 func save(page *crawler.Page) {
@@ -57,7 +57,7 @@ func crawl(url string, saveResults bool) {
     save(page)
   }
   a := graph(page)
-  ioutil.WriteFile("test.dot", []byte(a.String()), 0755)
+  ioutil.WriteFile(url+".dot", []byte(a.String()), 0755)
 }
 
 func graph(page *crawler.Page) *ast.Graph {
