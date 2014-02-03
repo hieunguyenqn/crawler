@@ -8,10 +8,10 @@ import (
 const MAX_WEB_WORKERS int = 20
 
 /////////////////////////////
-// job
+// Job
 /////////////////////////////
 
-type job struct {
+type Job struct {
   ScrapeQueue  pageStack
   WebWorkers   []*webWorker
   retryLock    sync.Mutex
@@ -21,8 +21,8 @@ type job struct {
   PagesScraped int64
 }
 
-func newJob(page *Page) *job {
-  j := new(job)
+func NewJob(page *Page) *Job {
+  j := new(Job)
   j.Pages = NewPages()
   j.Assets = NewAssets()
   j.Retries = make(map[*Page]int)
@@ -34,7 +34,7 @@ func newJob(page *Page) *job {
   return j
 }
 
-func (j *job) Start() {
+func (j *Job) Start() {
   j.startWorkers()
   ticker := time.NewTicker(50 * time.Millisecond)
   func() {
@@ -50,18 +50,18 @@ func (j *job) Start() {
   }()
 }
 
-func (j *job) Stop() {
+func (j *Job) Stop() {
   j.stopWorkers()
 }
 
-func (j *job) Done() bool {
+func (j *Job) Done() bool {
   if j.ScrapeQueue.Len() == 0 && j.WorkersDone() {
     return true
   }
   return false
 }
 
-func (j *job) WorkersDone() bool {
+func (j *Job) WorkersDone() bool {
   for _, w := range j.WebWorkers {
     if w.busy.Value() {
       return false
@@ -70,7 +70,7 @@ func (j *job) WorkersDone() bool {
   return true
 }
 
-func (j *job) Requeue(page *Page) {
+func (j *Job) Requeue(page *Page) {
   j.retryLock.Lock()
   defer j.retryLock.Unlock()
   val := j.Retries[page]
@@ -81,13 +81,13 @@ func (j *job) Requeue(page *Page) {
   j.ScrapeQueue.Push(page)
 }
 
-func (j *job) startWorkers() {
+func (j *Job) startWorkers() {
   for _, w := range j.WebWorkers {
     go w.Scrape()
   }
 }
 
-func (j *job) stopWorkers() {
+func (j *Job) stopWorkers() {
   for _, w := range j.WebWorkers {
     w.stop <- 1
   }

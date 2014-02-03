@@ -16,7 +16,7 @@ func Scrape(u string) *Page {
   page := new(Page)
   parsedUrl, _ := url.Parse(u)
   page.URL = parsedUrl
-  j := newJob(page)
+  j := NewJob(page)
   j.Start()
   fmt.Println("Scraped: ", j.PagesScraped)
   return page

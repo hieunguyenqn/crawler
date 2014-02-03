@@ -12,11 +12,11 @@ import (
 type webWorker struct {
   id   int
   busy safeBool
-  job  *job
+  job  *Job
   stop chan int
 }
 
-func newWebWorker(id int, j *job) *webWorker {
+func newWebWorker(id int, j *Job) *webWorker {
   w := new(webWorker)
   w.id = id
   w.job = j
