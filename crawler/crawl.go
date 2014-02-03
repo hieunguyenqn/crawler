@@ -1,7 +1,6 @@
 package crawler
 
 import (
-  "fmt"
   "github.com/PuerkitoBio/goquery"
   "strings"
 )
@@ -19,8 +18,6 @@ func Crawl(u string) (*Page, *Job) {
 func (w *webWorker) Crawl(p *Page) bool {
   doc, e := goquery.NewDocument(p.URL.String())
   if e != nil {
-    // TODO Inspect error, don't blindly push.
-    fmt.Println("Error: ", e)
     // Only retries 3 times.
     w.job.Requeue(p)
     return false
