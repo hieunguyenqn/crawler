@@ -5,8 +5,6 @@ import (
   "github.com/PuerkitoBio/goquery"
   "net/url"
   "strings"
-  "sync/atomic"
-  "time"
 )
 
 func main() {
@@ -20,18 +18,7 @@ func Scrape(u string) *Page {
   page.URL = parsedUrl
   j := newJob(page)
   j.Start()
-  time.Sleep(1 * time.Second)
-  func() {
-    for {
-      fmt.Println("Pages Scraped: ", atomic.LoadInt64(&j.PagesScraped))
-      if j.Done() {
-        j.Stop()
-        return
-      }
-      time.Sleep(10 * time.Millisecond)
-    }
-  }()
-
+  fmt.Println("Scraped: ", j.PagesScraped)
   return page
 }
 
@@ -50,7 +37,8 @@ func (w *webWorker) Crawl(p *Page) bool {
     if !ok {
       return
     }
-    if strings.Contains(u, "mailto") {
+    // Skip mails and on-page navigation
+    if strings.Contains(u, "mailto") || len(u) > 0 && u[0] == '#' {
       return
     }
 
