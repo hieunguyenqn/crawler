@@ -10,7 +10,7 @@ import (
 func Test_Scrape(t *testing.T) {
   ts := setupSinglePage()
   defer ts.Close()
-  page := crawler.Scrape(ts.URL)
+  page, _ := crawler.Crawl(ts.URL)
   if len(page.Links) > 0 {
     t.Errorf("Page should not have links.")
   }
@@ -20,7 +20,7 @@ func Test_Scrape5(t *testing.T) {
   ts := setupFiveSubpages()
   defer ts.Close()
 
-  page := crawler.Scrape(ts.URL)
+  page, _ := crawler.Crawl(ts.URL)
   if len(page.Links) != 5 {
     t.Errorf("Page should have 5 subpages.")
   }
@@ -39,7 +39,7 @@ func Benchmark_Scrape5(b *testing.B) {
   b.StartTimer()
 
   for i := 0; i < b.N; i++ {
-    crawler.Scrape(ts.URL)
+    crawler.Crawl(ts.URL)
   }
 }
 
@@ -47,7 +47,7 @@ func Test_ScrapeCircular(t *testing.T) {
   ts := setupCircularSubpages()
   defer ts.Close()
 
-  page := crawler.Scrape(ts.URL)
+  page, _ := crawler.Crawl(ts.URL)
   if len(page.Links) != 1 {
     t.Errorf("Page should have 1 subpage.")
   }
