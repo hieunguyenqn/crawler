@@ -45,3 +45,12 @@ type Asset struct {
 func NewAsset(u *url.URL) *Asset {
   return &Asset{URL: u, Path: u.String()}
 }
+
+func NewAssetFromString(u string) (*Asset, error) {
+  parsedUrl, e := url.Parse(u)
+  if e != nil {
+    return nil, e
+  }
+
+  return NewAsset(parsedUrl), nil
+}
