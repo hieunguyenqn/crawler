@@ -5,13 +5,14 @@ import (
   "time"
 )
 
-const MAX_WEB_WORKERS int = 20
+const MAX_WEB_WORKERS int = 30
 
 /////////////////////////////
 // Job
 /////////////////////////////
 
 type Job struct {
+  StartPage    *Page
   ScrapeQueue  pageStack
   WebWorkers   []*webWorker
   retryLock    sync.Mutex
@@ -23,6 +24,7 @@ type Job struct {
 
 func NewJob(page *Page) *Job {
   j := new(Job)
+  j.StartPage = page
   j.Pages = NewPages()
   j.Assets = NewAssets()
   j.Retries = make(map[*Page]int)
