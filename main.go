@@ -3,15 +3,21 @@ package main
 import (
   "fmt"
   "github.com/macb/crawler/crawler"
+  "os"
+  "runtime/pprof"
   "time"
 )
 
 func main() {
-  crawl("http://www.macasaurus.com", false)
+  //crawl("http://www.macasaurus.com", false)
+  f, _ := os.Create("rwar")
+  pprof.StartCPUProfile(f)
+  defer pprof.StopCPUProfile()
   crawl("http://www.devbootcamp.com", false)
-  crawl("http://www.spirent.com", false)
-  crawl("http://www.digitalocean.com", false)
-  crawl("http://www.apple.com", false)
+
+  //crawl("http://www.spirent.com", false)
+  //crawl("http://www.digitalocean.com", false)
+  //crawl("http://www.apple.com", false)
 }
 
 func printFirstLevel(page *crawler.Page) {
