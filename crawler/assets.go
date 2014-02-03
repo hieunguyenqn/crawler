@@ -38,9 +38,10 @@ func (a *Assets) New(u *url.URL) *Asset {
 // Asset
 ///////////////////////////////
 type Asset struct {
-  *url.URL
+  Path     string
+  *url.URL `json:"-"` // Don't want to encode the URL.
 }
 
 func NewAsset(u *url.URL) *Asset {
-  return &Asset{URL: u}
+  return &Asset{URL: u, Path: u.String()}
 }

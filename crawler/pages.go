@@ -38,13 +38,14 @@ func (p *Pages) NewPage(u *url.URL) (*Page, bool) {
 // Page
 ///////////////////////////////
 type Page struct {
-  *url.URL
-  Links  []*Page
-  Assets []*Asset
+  Path     string
+  *url.URL `json:"-"` // Don't want to encode the URL.
+  Links    []*Page
+  Assets   []*Asset
 }
 
 func NewPage(u *url.URL) *Page {
-  return &Page{URL: u}
+  return &Page{URL: u, Path: u.String()}
 }
 
 func NewPageFromString(u string) (*Page, error) {
