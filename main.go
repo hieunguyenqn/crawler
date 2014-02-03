@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-  scrape("http://www.macasaurus.com", false)
-  scrape("http://www.devbootcamp.com", false)
-  scrape("http://www.spirent.com", false)
-  scrape("http://www.digitalocean.com", false)
-  scrape("http://www.apple.com", false)
+  crawl("http://www.macasaurus.com", false)
+  crawl("http://www.devbootcamp.com", false)
+  crawl("http://www.spirent.com", false)
+  crawl("http://www.digitalocean.com", false)
+  crawl("http://www.apple.com", false)
 }
 
 func printFirstLevel(page *crawler.Page) {
@@ -24,13 +24,13 @@ func printFirstLevel(page *crawler.Page) {
   }
 }
 
-func scrape(url string, printResults bool) {
+func crawl(url string, printResults bool) {
   start := time.Now()
-  page, job := crawler.Scrape(url)
+  page, job := crawler.Crawl(url)
   if printResults {
     printFirstLevel(page)
   }
   stop := time.Now()
   duration := stop.Sub(start)
-  fmt.Printf("Starting from %s, scraped %d pages in %s\n", page.URL, job.PagesScraped, duration)
+  fmt.Printf("Starting from %s, crawled %d pages in %s\n", page.URL, job.PagesCrawled, duration)
 }
