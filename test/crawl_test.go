@@ -31,6 +31,18 @@ func Test_Scrape5(t *testing.T) {
   }
 }
 
+func Benchmark_Scrape5(b *testing.B) {
+
+  b.StopTimer()
+  ts := setupFiveSubpages()
+  defer ts.Close()
+  b.StartTimer()
+
+  for i := 0; i < b.N; i++ {
+    crawler.Scrape(ts.URL)
+  }
+}
+
 func Test_ScrapeCircular(t *testing.T) {
   ts := setupCircularSubpages()
   defer ts.Close()
