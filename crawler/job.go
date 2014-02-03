@@ -13,13 +13,13 @@ const MAX_WEB_WORKERS int = 30
 
 type Job struct {
   StartPage    *Page
-  ScrapeQueue  pageStack
+  Queue        pageStack
   WebWorkers   []*webWorker
   retryLock    sync.Mutex
   Retries      map[*Page]int
   Pages        *Pages
   Assets       *Assets
-  PagesScraped int64
+  PagesCrawled int64
 }
 
 func NewJob(page *Page) *Job {
@@ -32,7 +32,7 @@ func NewJob(page *Page) *Job {
     w := newWebWorker(i, j)
     j.WebWorkers = append(j.WebWorkers, w)
   }
-  j.ScrapeQueue.Push(page)
+  j.Queue.Push(page)
   return j
 }
 
@@ -57,7 +57,7 @@ func (j *Job) Stop() {
 }
 
 func (j *Job) Done() bool {
-  if j.ScrapeQueue.Len() == 0 && j.WorkersDone() {
+  if j.Queue.Len() == 0 && j.WorkersDone() {
     return true
   }
   return false
@@ -80,12 +80,12 @@ func (j *Job) Requeue(page *Page) {
     return
   }
   j.Retries[page] = val + 1
-  j.ScrapeQueue.Push(page)
+  j.Queue.Push(page)
 }
 
 func (j *Job) startWorkers() {
   for _, w := range j.WebWorkers {
-    go w.Scrape()
+    go w.Work()
   }
 }
 

@@ -24,19 +24,19 @@ func newWebWorker(id int, j *Job) *webWorker {
   return w
 }
 
-func (w *webWorker) Scrape() {
+func (w *webWorker) Work() {
   ticker := time.NewTicker(50 * time.Millisecond)
   for {
     select {
     case <-w.stop:
       return
     case <-ticker.C:
-      if w.job.ScrapeQueue.Len() > 0 {
+      if w.job.Queue.Len() > 0 {
         w.busy.True()
-        if page := w.job.ScrapeQueue.Pop(); page != nil {
+        if page := w.job.Queue.Pop(); page != nil {
           success := w.Crawl(page)
           if success {
-            atomic.AddInt64(&w.job.PagesScraped, 1)
+            atomic.AddInt64(&w.job.PagesCrawled, 1)
           }
         }
         w.busy.False()

@@ -6,19 +6,13 @@ import (
   "strings"
 )
 
-func main() {
-  Scrape("http://www.macasaurus.com")
-  Scrape("http://www.digitalocean.com")
-}
-
-func Scrape(u string) (*Page, *Job) {
+func Crawl(u string) (*Page, *Job) {
   page, err := NewPageFromString(u)
   if err != nil {
     panic(err)
   }
   j := NewJob(page)
   j.Start()
-  fmt.Println("Scraped: ", j.PagesScraped)
   return page, j
 }
 
@@ -50,7 +44,7 @@ func (w *webWorker) Crawl(p *Page) bool {
     subpage, newPage := w.job.Pages.NewPage(parsedUrl)
     // Go gettem' tiger
     if newPage {
-      w.job.ScrapeQueue.Push(subpage)
+      w.job.Queue.Push(subpage)
     }
     p.Links = append(p.Links, subpage)
   })
