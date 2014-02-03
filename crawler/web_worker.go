@@ -2,7 +2,6 @@ package crawler
 
 import (
   "sync/atomic"
-  "time"
 )
 
 /////////////////////////////
@@ -25,22 +24,18 @@ func newWebWorker(id int, j *Job) *webWorker {
 }
 
 func (w *webWorker) Work() {
-  ticker := time.NewTicker(50 * time.Millisecond)
   for {
     select {
     case <-w.stop:
       return
-    case <-ticker.C:
-      if w.job.Queue.Len() > 0 {
-        w.busy.True()
-        if page := w.job.Queue.Pop(); page != nil {
-          success := w.Crawl(page)
-          if success {
-            atomic.AddInt64(&w.job.PagesCrawled, 1)
-          }
-        }
-        w.busy.False()
+    case page := <-w.job.Queue:
+      w.busy.True()
+      success := w.Crawl(page)
+      if success {
+        atomic.AddInt64(&w.job.PagesCrawled, 1)
       }
+      w.busy.False()
+      go func() { w.job.done <- 1 }()
     }
   }
 }

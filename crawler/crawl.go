@@ -23,7 +23,6 @@ func (w *webWorker) Crawl(p *Page) bool {
     return false
   }
 
-  newPages := make([]*Page, 10)
   doc.Find("a").Each(func(i int, s *goquery.Selection) {
     u, ok := s.Attr("href")
     if !ok {
@@ -39,16 +38,23 @@ func (w *webWorker) Crawl(p *Page) bool {
       return
     }
 
-    // TODO Skip any subpages of different domains
     subpage, newPage := w.job.Pages.NewPage(parsedUrl)
 
-    // Go gettem' tiger
-    if newPage {
-      newPages = append(newPages, subpage)
+    // Scrape new pages that share the same host.
+    if newPage && subpage.Host == p.Host {
+
+      // TODO Better solution.
+      // This will use 4KB of memory for every request that can't be put into the
+      // queue immediately. Probably messes with garbage collection as well since
+      // page can't be cleaned up. Something like an infinite queue.
+
+      // Send in a goroutine to avoid any chance of being blocked.
+      go func() { w.job.Queue <- subpage }()
     }
+
+    // Add all subpages as links, even if they weren't crawled.
     p.Links = append(p.Links, subpage)
   })
-  w.job.Queue.PushBulk(newPages)
 
   assetTags := map[string]string{
     "script": "src",
